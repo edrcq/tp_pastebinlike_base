@@ -31,6 +31,7 @@ module.exports = function createUserController(db) {
 
             return { success: true, authToken: user.authToken }
         }
+
     }
 
 

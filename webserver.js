@@ -3,6 +3,7 @@ const cors = require('cors')
 const createRouter = require('./createRouter')
 const Twig = require('twig')
 const bodyParser = require('body-parser')
+var cookieParser = require('cookie-parser')
 
 async function createWebServer(db) {
     const app = express()
@@ -19,7 +20,7 @@ async function createWebServer(db) {
     });
 
     app.use(cors())
-
+    app.use(cookieParser())
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
 

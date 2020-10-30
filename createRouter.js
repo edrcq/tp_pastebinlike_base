@@ -1,22 +1,24 @@
 const Router = require('express').Router
 const createUserController = require('./controllers/users.controller')
-
+const createPasteController = require('./controllers/pastes.controller')
 
 async function createRouter(db) {
     const router = Router()
     const UserController = createUserController(db)
+    const PasteController = createPasteController(db)
 
     async function isAuth(req, res, next) {
-        console.log('isAuth is called now')
+        console.log('isAuth middleware is called now')
         if (req.headers['authorization']) {
             const token = req.headers['authorization']
-            console.log('token is', token)
+            console.log('user token is', token)
             const result = await db.collection('users').findOne({ authToken: token })
             if (result) {
                 req.isAuth = true
                 req.authUser = result
             }
         }
+
 
         next();
     }
@@ -49,10 +51,26 @@ async function createRouter(db) {
         })
     })
 
-    router.get('/:slug', isAuth, async function (req, res) {
+    router.post('/new-paste', isAuth, async (req, res) => {
+        let paste_user = false
+        if (req.isAuth) {
+            paste_user = req.authUser
+        }
+
+        const result = await PasteController.createPaste(req.body, paste_user)
+        return res.json(result)
+    })
+
+    router.get('/p/:slug', isAuth, async function (req, res) {
         console.log(req.params.slug)
 
-        return res.json({ slug: req.params.slug })
+        const paste = await PasteController.getBySlug(req.params.slug)
+        return res.json(paste)
+    })
+
+    router.get('/latest-pastes', async function (req, res) {
+        const pastes = await PasteController.getLatests()
+        return res.json({ pastes })
     })
 
     
