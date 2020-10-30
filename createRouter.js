@@ -43,6 +43,7 @@ async function createRouter(db) {
         if (!req.isAuth) {
             return res.status(401).end();
         }
+
         const mypastes = await db.collection('pastes').find({ 'owner.id': req.authUser._id }, 'title slug createdAt').toArray()
 
         return res.json({
@@ -70,7 +71,9 @@ async function createRouter(db) {
 
     router.get('/latest-pastes', async function (req, res) {
         const pastes = await PasteController.getLatests()
-        return res.json({ pastes })
+        return res.json({
+            pastes,
+        })
     })
 
     

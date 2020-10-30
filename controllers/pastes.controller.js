@@ -7,11 +7,7 @@ module.exports = function createUserController(db) {
 
     async function checkIfSlugExist(slug) {
         const result = await pastes.findOne({ slug })
-        if (!result) {
-            return true
-        }
-        return false
-        // version courte: return (!result ? true : false)
+        return (!result ? true : false)
     }
 
     function checkExposure(exposure) {
@@ -29,9 +25,9 @@ module.exports = function createUserController(db) {
         }
         if (paste.owner && paste.owner.type === 'user') {
             if (paste.show_owner && paste.show_owner === true) {
-                const findRes = await users.findOne({ _id: paste.owner.id })
-                if (findRes) {
-                    owner.name = findRes.pseudo
+                const userFound = await users.findOne({ _id: paste.owner.id })
+                if (userFound) {
+                    owner.name = userFound.pseudo
                 }
             }
         }
@@ -46,7 +42,6 @@ module.exports = function createUserController(db) {
                 slug,
                 goodSlug = false;
 
-            show_owner = new Boolean(show_owner)
             if (!checkExposure(exposure)) {
                 return { error: 'Bad exposure parameter' }
             }
@@ -76,15 +71,11 @@ module.exports = function createUserController(db) {
                 show_owner,
                 exposure,
             })
-            console.log({ inserted })
 
             return { success: true, slug }
         },
 
         async getBySlug(slug) {
-            let owner = {
-                name: 'Anonymous'
-            }
             const paste = await pastes.findOne({ slug })
             const cleaned = cleanPaste(paste)
             return cleaned
@@ -93,12 +84,17 @@ module.exports = function createUserController(db) {
         async getLatests() {
             const list = await pastes.find({ exposure: 'public' }).sort({ createdAt: -1 }).limit(10).toArray()
 
+            // const cleanedList = []
+            // for (let paste of list) {
+            //     cleanedList.push(await cleanPaste(paste))
+            // }
             const promises_list = []
             for (let paste of list) {
                 promises_list.push(cleanPaste(paste))
             }
 
             const good_list = await Promise.all(promises_list)
+
             return good_list
         }
     }
