@@ -28,9 +28,11 @@ module.exports = function createUserController(db) {
             name: 'Anonymous'
         }
         if (paste.owner && paste.owner.type === 'user') {
-            const findRes = await users.findOne({ _id: paste.owner.id })
-            if (findRes) {
-                owner.name = findRes.pseudo
+            if (paste.show_owner && paste.show_owner === true) {
+                const findRes = await users.findOne({ _id: paste.owner.id })
+                if (findRes) {
+                    owner.name = findRes.pseudo
+                }
             }
         }
         paste.owner = owner
@@ -89,7 +91,7 @@ module.exports = function createUserController(db) {
         },
 
         async getLatests() {
-            const list = await pastes.find().sort({ createdAt: -1 }).limit(10).toArray()
+            const list = await pastes.find({ exposure: 'public' }).sort({ createdAt: -1 }).limit(10).toArray()
 
             const promises_list = []
             for (let paste of list) {
