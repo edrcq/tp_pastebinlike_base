@@ -78,7 +78,7 @@ module.exports = function createUserController(db) {
             })
             console.log({ inserted })
 
-            return { success: true }
+            return { success: true, slug }
         },
 
         async getBySlug(slug) {
